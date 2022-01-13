@@ -374,7 +374,7 @@ show_usage() {
 show_menu() {
     echo -e "
   ${green}kịch bản quản lý phụ trợ soga，${plain}${red}không hoạt động với docker${plain}
---- https://github.com/herotbty/Aiko-Soga-Crack ---
+--- https://github.com/herotbty/Aiko-Soga---
   ${green}0.${plain} tập lệnh thoát
 ————————————————
   ${green}1.${plain} cài đặt soga
