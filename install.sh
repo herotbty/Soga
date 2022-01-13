@@ -29,6 +29,19 @@ else
     echo -e "${red}Phiên bản hệ thống không được phát hiện, vui lòng liên hệ với tác giả kịch bản!${plain}\n" && exit 1
 fi
 
+arch=$(arch)
+
+if [[ $arch == "x86_64" || $arch == "x64" || $arch == "amd64" ]]; then
+  arch="amd64"
+elif [[ $arch == "aarch64" || $arch == "arm64" ]]; then
+  arch="arm64"
+else
+  arch="amd64"
+  echo -e "${red}Không phát hiện được giản đồ, hãy sử dụng lược đồ mặc định: ${arch}${plain}"
+fi
+
+echo "架构: ${arch}"
+
 if [ "$(getconf WORD_BIT)" != '32' ] && [ "$(getconf LONG_BIT)" != '64' ] ; then
     echo "Phần mềm này không hỗ trợ hệ thống 32-bit (x86), vui lòng sử dụng hệ thống 64-bit (x86_64), nếu phát hiện sai, vui lòng liên hệ với tác giả"
     exit 2
@@ -82,6 +95,7 @@ check_status() {
 
 install_acme() {
     curl https://get.acme.sh | sh
+    /root/.acme.sh/acme.sh --set-default-ca --server letsencrypt
 }
 
 install_soga() {
@@ -91,24 +105,24 @@ install_soga() {
     fi
 
     if  [ $# == 0 ] ;then
-        last_version=$(curl -Ls "https://api.github.com/repos/herotbty/Soga/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        last_version=$(curl -Ls "https://api.github.com/repos/vaxilu/soga/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         if [[ ! -n "$last_version" ]]; then
             echo -e "${red}Không phát hiện được phiên bản soga, có thể đã vượt quá giới hạn API Github, vui lòng thử lại sau hoặc chỉ định phiên bản soga để cài đặt theo cách thủ công${plain}"
             exit 1
         fi
         echo -e "Đã phát hiện phiên bản mới nhất của Soga:${last_version}，bắt đầu cài đặt"
-        wget -N --no-check-certificate -O /usr/local/soga.tar.gz https://github.com/herotbty/Aiko-Soga/releases/download/${last_version}/soga-cracked-linux64.tar.gz
+        wget -N --no-check-certificate -O /usr/local/soga.tar.gz https://github.com/vaxilu/soga/releases/download/${last_version}/soga-linux-${arch}.tar.gz
         if [[ $? -ne 0 ]]; then
             echo -e "${red}Không thể tải xuống soga, vui lòng đảm bảo máy chủ của bạn có thể tải xuống tệp Github${plain}"
             exit 1
         fi
     else
         last_version=$1
-        url="https://github.com/herotbty/Soga/releases/download/${last_version}/soga-cracked-linux64.tar.gz"
+        url="https://github.com/vaxilu/soga/releases/download/${last_version}/soga-linux-${arch}.tar.gz"
         echo -e "bắt đầu cài đặt soga v$1"
         wget -N --no-check-certificate -O /usr/local/soga.tar.gz ${url}
         if [[ $? -ne 0 ]]; then
-            echo -e "${red}tải soga v$1 không thành công, hãy đảm bảo rằng phiên bản này tồn tại${plain}"
+            echo -e "${red}Tải xuống soga v$1 không thành công, hãy đảm bảo rằng phiên bản này tồn tại${plain}"
             exit 1
         fi
     fi
@@ -119,7 +133,9 @@ install_soga() {
     chmod +x soga
     mkdir /etc/soga/ -p
     rm /etc/systemd/system/soga.service -f
+    rm /etc/systemd/system/soga@.service -f
     cp -f soga.service /etc/systemd/system/
+    cp -f soga@.service /etc/systemd/system/
     systemctl daemon-reload
     systemctl stop soga
     systemctl enable soga
@@ -127,7 +143,7 @@ install_soga() {
     if [[ ! -f /etc/soga/soga.conf ]]; then
         cp soga.conf /etc/soga/
         echo -e ""
-        echo -e "Để cài đặt mới, trước tiên hãy tham khảo hướng dẫn wiki:https://github.com/sprov065/soga/wiki，Định cấu hình nội dung cần thiết"
+        echo -e "Để cài đặt mới, vui lòng tham khảo hướng dẫn trước: https://aikocute.tk, cấu hình các nội dung cần thiết"
     else
         systemctl start soga
         sleep 2
@@ -136,7 +152,7 @@ install_soga() {
         if [[ $? == 0 ]]; then
             echo -e "${green}soga khởi động lại thành công${plain}"
         else
-            echo -e "${red}soga có thể không khởi động được, vui lòng sử dụng soga log để kiểm tra thông tin nhật ký sau, nếu không khởi động được, định dạng cấu hình có thể đã bị thay đổi, vui lòng vào wiki để kiểm tra:https://github.com/RManLuo/crack-soga-v2ray/wiki${plain}"
+            echo -e "${red}soga có thể không khởi động được, vui lòng sử dụng nhật ký soga để xem thông tin nhật ký sau"
         fi
     fi
 
@@ -146,8 +162,13 @@ install_soga() {
     if [[ ! -f /etc/soga/dns.yml ]]; then
         cp dns.yml /etc/soga/
     fi
-    curl -o /usr/bin/soga -Ls https://raw.githubusercontent.com/herotbty/Aiko-Soga/Aiko/soga.sh
+    if [[ ! -f /etc/soga/routes.toml ]]; then
+        cp routes.toml /etc/soga/
+    fi
+    curl -o /usr/bin/soga -Ls https://raw.githubusercontent.com/vaxilu/soga/master/soga.sh
     chmod +x /usr/bin/soga
+    curl -o /usr/bin/soga-tool -Ls https://raw.githubusercontent.com/vaxilu/soga/master/soga-tool-${arch}
+    chmod +x /usr/bin/soga-tool
     echo -e ""
     echo "Cách sử dụng tập lệnh quản lý soga : - Crack By Aiko"
     echo "------------------------------------------"
