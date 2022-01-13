@@ -80,6 +80,6 @@ docker run --restart=always --name crack-soga -d -v /etc/soga/:/etc/soga/ --netw
 --node_id=1
 ```
 # setting config Soga < tiếng tàu khựa > 
-[ConfigSetting](https://soga.yougotme.cc/)
+[ConfigSetting](https://ivpsr.com/235.html)
 
 
