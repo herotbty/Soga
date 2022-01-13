@@ -91,7 +91,7 @@ install_soga() {
     fi
 
     if  [ $# == 0 ] ;then
-        last_version=$(curl -Ls "https://api.github.com/repos/herotbty/Aiko-Soga/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+        last_version=$(curl -Ls "https://api.github.com/repos/herotbty/Soga/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         if [[ ! -n "$last_version" ]]; then
             echo -e "${red}Không phát hiện được phiên bản soga, có thể đã vượt quá giới hạn API Github, vui lòng thử lại sau hoặc chỉ định phiên bản soga để cài đặt theo cách thủ công${plain}"
             exit 1
@@ -104,7 +104,7 @@ install_soga() {
         fi
     else
         last_version=$1
-        url="https://github.com/herotbty/Aiko-Soga/releases/download/${last_version}/soga-cracked-linux64.tar.gz"
+        url="https://github.com/herotbty/Soga/releases/download/${last_version}/soga-cracked-linux64.tar.gz"
         echo -e "bắt đầu cài đặt soga v$1"
         wget -N --no-check-certificate -O /usr/local/soga.tar.gz ${url}
         if [[ $? -ne 0 ]]; then
