@@ -165,7 +165,7 @@ install_soga() {
     if [[ ! -f /etc/soga/routes.toml ]]; then
         cp routes.toml /etc/soga/
     fi
-    curl -o /usr/bin/soga -Ls https://raw.githubusercontent.com/herotbty/Soga/master/soga.sh
+    curl -o /usr/bin/soga -Ls https://raw.githubusercontent.com/herotbty/Soga/data/soga.sh
     chmod +x /usr/bin/soga
     curl -o /usr/bin/soga-tool -Ls https://raw.githubusercontent.com/herotbty/Soga/master/soga-tool-${arch}
     chmod +x /usr/bin/soga-tool
